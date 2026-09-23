@@ -58,7 +58,7 @@ public:
   Vector3Float grid; /**< :Cell sizes in each direction: */
   int verticalStretching = 0; /**< :Defines grid type in z-direction (0-unifrom (default), 1-custom): */
   std::vector<float> dz_value; /**< :Array holding values of dz if the verticalStretching is 1: */
-  unsigned int totalTimeIncrements; /**< :Total number of time steps: */
+  unsigned int totalTimeIncrements = 0; /**< :Total number of time steps (0 = all): */
   int logLawFlag = 0; /**< :Log Law flag to apply the log law (0-off (default), 1-on): */
   int maxIterations = 500; /**< :Maximum number of iterations (default = 500): */
   double tolerance = 1e-9; /**< :Convergence criteria, error threshold (default = 1e-9): */

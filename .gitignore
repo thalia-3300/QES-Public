@@ -7,6 +7,16 @@ build_old/
 buildPIV/
 src/docs/*
 docs/*
+!docs/QES_WINDS_PLUME_USER_GUIDE.md
+!docs/WINDNINJA_INPUT.md
+!docs/WINDNINJA_TEST_RESULTS.md
+!docs/examples/
+!docs/examples/winds_minimal.xml
+!docs/examples/plume_minimal.xml
+!docs/examples/winds_WindNinja_Clare.xml
+!docs/examples/winds_WindNinja_Testing.xml
+!docs/examples/winds_WindNinja_Clare_Turbulence.xml
+!docs/examples/plume_WindNinja_Clare.xml
 data/InputFiles/vineyard_tower_validation/*
 
 # Prerequisites

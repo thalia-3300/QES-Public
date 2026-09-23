@@ -178,7 +178,8 @@ TURBGeneralData::TURBGeneralData(const WINDSInputData *WID, WINDSGeneralData *WG
     zRef = 3.0 * bldgH_mean;
 
   } else {
-    z0d = WID->metParams->sensors[0]->TS[0]->site_z0;
+    z0d = WID->metParams->windShapefile ? WID->metParams->windShapefile->siteZ0
+                                      : WID->metParams->sensors[0]->TS[0]->site_z0;
     d0d = 0.0;
     zRef = 100.0 * z0d;
   }

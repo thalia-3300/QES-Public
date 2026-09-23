@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QESPlumeParameters>
+  <!--
+    Short, lightweight Clare Valley tracer example. Coordinates are local QES
+    metres, not MGA/UTM coordinates. Change the source position and release to
+    represent the real scenario before scientific use.
+  -->
+  <plumeParameters>
+    <simDur>60.0</simDur>
+    <timeStep>1.0</timeStep>
+    <CourantNumber>0.25</CourantNumber>
+    <invarianceTol>1e-5</invarianceTol>
+    <interpolationMethod>triLinear</interpolationMethod>
+    <updateFrequency_particleLoop>10000</updateFrequency_particleLoop>
+    <updateFrequency_timeLoop>10.0</updateFrequency_timeLoop>
+  </plumeParameters>
+
+  <!-- Coarse concentration grid covering the usable 960 x 960 x 300 m domain. -->
+  <collectionParameters>
+    <timeAvgStart>0.0</timeAvgStart>
+    <timeAvgFreq>10.0</timeAvgFreq>
+    <boxBoundsX1>10.0</boxBoundsX1>
+    <boxBoundsX2>950.0</boxBoundsX2>
+    <boxBoundsY1>10.0</boxBoundsY1>
+    <boxBoundsY2>950.0</boxBoundsY2>
+    <boxBoundsZ1>10.0</boxBoundsZ1>
+    <boxBoundsZ2>290.0</boxBoundsZ2>
+    <nBoxesX>24</nBoxesX>
+    <nBoxesY>24</nBoxesY>
+    <nBoxesZ>15</nBoxesZ>
+  </collectionParameters>
+
+  <particleParameters>
+    <baseParticle>
+      <tag>clare_tracer</tag>
+      <source>
+        <particleDensity>0.0</particleDensity>
+        <particleDiameter>0.0</particleDiameter>
+        <releaseType_continuous>
+          <releaseStartTime>0.0</releaseStartTime>
+          <particlePerTimestep>20</particlePerTimestep>
+          <massPerSec>1.0</massPerSec>
+        </releaseType_continuous>
+        <!-- Centre of the local domain; z=150 m is above the tested terrain. -->
+        <sourceGeometry_Point>
+          <posX>480.0</posX>
+          <posY>480.0</posY>
+          <posZ>150.0</posZ>
+        </sourceGeometry_Point>
+      </source>
+    </baseParticle>
+  </particleParameters>
+
+  <boundaryConditions>
+    <xBCtype>exiting</xBCtype>
+    <yBCtype>exiting</yBCtype>
+    <zBCtype>reflection</zBCtype>
+    <wallReflection>stairstepReflection</wallReflection>
+  </boundaryConditions>
+</QESPlumeParameters>

@@ -41,6 +41,7 @@
 #include "util/ParseInterface.h"
 #include "util/ParseException.h"
 #include "Sensor.h"
+#include "WindShapefileInput.h"
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -62,6 +63,7 @@ class MetParams : public ParseInterface
 private:
 public:
   int z0_domain_flag = 0; /**< :document this: */
+  WindShapefileInput *windShapefile = nullptr;
   std::vector<Sensor *> sensors; /**< :document this: */
 
   std::vector<std::string> sensorName; /**< :document this: */
@@ -73,6 +75,9 @@ public:
   virtual void parseValues()
   {
     parsePrimitive<int>(false, z0_domain_flag, "z0_domain_flag");
+    if (tree.count("windShapefile") > 1)
+      throw ParseException("Only one windShapefile is supported");
+    parseElement<WindShapefileInput>(false, windShapefile, "windShapefile");
     parseMultiElements<Sensor>(false, sensors, "sensor");
 
     parseMultiPrimitives<std::string>(false, sensorName, "sensorName");

@@ -34,6 +34,7 @@
  */
 
 #include "WINDSGeneralData.h"
+#include "WindProfilerShapefile.h"
 
 #include <utility>
 
@@ -118,7 +119,16 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
   //
   // Need to now take all WRF station data and convert to
   // sensors
-  if (WID->simParams->wrfInputData) {
+  if (WID->metParams && WID->metParams->windShapefile) {
+    windProfiler = new WindProfilerShapefile(WID, domain);
+    sensortime.emplace_back(WID->metParams->windShapefile->timeStamp);
+    sensortime_id.push_back(0);
+    timestamp = sensortime;
+    totalTimeIncrements = 1;
+    UTMx = WID->metParams->windShapefile->originX;
+    UTMy = WID->metParams->windShapefile->originY;
+    UTMZone = WID->simParams->UTMZone;
+  } else if (WID->simParams->wrfInputData) {
 
     WRFInput *wrf_ptr = WID->simParams->wrfInputData;
 
@@ -386,8 +396,9 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
   }
 
   // Pete could move to input param processing...
-  assert(WID->metParams->sensors.size() > 0);// extra
-  std::cout << "[QES-WINDS]\t Sensors have been loaded (total sensors = " << WID->metParams->sensors.size() << ")." << std::endl;
+  assert(WID->metParams->windShapefile || !WID->metParams->sensors.empty());
+  if (!WID->metParams->windShapefile)
+    std::cout << "[QES-WINDS]\t Sensors have been loaded (total sensors = " << WID->metParams->sensors.size() << ")." << std::endl;
 
   // /////////////////////////
   // Calculation of z0 domain info MAY need to move to WINDSInputData
@@ -401,9 +412,10 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
     for (auto i = 0; i < domain.nx(); i++) {
       for (auto j = 0; j < domain.ny(); j++) {
         id = i + j * domain.nx();
-        z0_domain_u[id] = WID->metParams->sensors[0]->TS[0]->site_z0;
-        z0_domain_v[id] = WID->metParams->sensors[0]->TS[0]->site_z0;
-        z0 = WID->metParams->sensors[0]->TS[0]->site_z0;
+        z0 = WID->metParams->windShapefile ? WID->metParams->windShapefile->siteZ0
+                                         : WID->metParams->sensors[0]->TS[0]->site_z0;
+        z0_domain_u[id] = z0;
+        z0_domain_v[id] = z0;
       }
     }
   } else {

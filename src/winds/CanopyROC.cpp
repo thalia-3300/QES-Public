@@ -199,9 +199,13 @@ void CanopyROC::setCellFlags(const WINDSInputData *WID, WINDSGeneralData *WGD, i
     }
   }
 
-  rL = WID->metParams->sensors[nearest_sensor_i]->TS[0]->site_one_overL;// uses first time step value only - figure out how to get current time step inside this function
-
-  z0_site = WID->metParams->sensors[nearest_sensor_i]->TS[0]->site_z0;
+  if (WID->metParams->windShapefile) {
+    rL = WID->metParams->windShapefile->reciprocal;
+    z0_site = WID->metParams->windShapefile->siteZ0;
+  } else {
+    rL = WID->metParams->sensors[nearest_sensor_i]->TS[0]->site_one_overL;
+    z0_site = WID->metParams->sensors[nearest_sensor_i]->TS[0]->site_z0;
+  }
 
   a_obf = pow(beta, 0.4);
 

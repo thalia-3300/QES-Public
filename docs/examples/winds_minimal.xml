@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QESWindsParameters>
+  <simulationParameters>
+    <!-- Three integer grid counts, followed by cell sizes in metres. -->
+    <domain>20 20 20</domain>
+    <cellSize>2.0 2.0 2.0</cellSize>
+    <verticalStretching>0</verticalStretching>
+    <totalTimeIncrements>1</totalTimeIncrements>
+
+    <maxIterations>100</maxIterations>
+    <tolerance>1e-9</tolerance>
+    <meshTypeFlag>0</meshTypeFlag>
+    <domainRotation>0.0</domainRotation>
+
+    <originFlag>0</originFlag>
+    <UTMx>0.0</UTMx>
+    <UTMy>0.0</UTMy>
+    <UTMZone>0</UTMZone>
+    <UTMZoneLetter></UTMZoneLetter>
+  </simulationParameters>
+
+  <metParams>
+    <z0_domain_flag>0</z0_domain_flag>
+    <sensor>
+      <!-- 1 = coordinates local to the QES domain. -->
+      <site_coord_flag>1</site_coord_flag>
+      <site_xcoord>10.0</site_xcoord>
+      <site_ycoord>10.0</site_ycoord>
+      <timeSeries>
+        <timeStamp>2026-01-01T00:00:00</timeStamp>
+        <boundaryLayerFlag>1</boundaryLayerFlag>
+        <siteZ0>0.1</siteZ0>
+        <reciprocal>0.0</reciprocal>
+        <height>10.0</height>
+        <speed>5.0</speed>
+        <direction>270.0</direction>
+      </timeSeries>
+    </sensor>
+  </metParams>
+
+  <!-- Required when qesWinds is run with -t. Method 0 works without OptiX. -->
+  <turbParams>
+    <method>0</method>
+  </turbParams>
+
+  <!-- Keep this section when -o is used; the visualisation writer reads it. -->
+  <fileOptions>
+    <outputFlag>1</outputFlag>
+    <outputFields>all</outputFields>
+  </fileOptions>
+</QESWindsParameters>

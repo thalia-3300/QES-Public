@@ -31,6 +31,7 @@
 /** @file WINDSInputData.h */
 
 #pragma once
+#include <cmath>
 
 /*
  * A collection of data read from an XML. This contains
@@ -113,5 +114,26 @@ public:
     parseElement<VegetationParams>(false, vegetationParams, "vegetationParams");
     parseElement<HRRRInput>(false, hrrrInput, "hrrrInput");
     parseElement<Fires>(false, fires, "fires");
+    if (metParams && metParams->windShapefile) {
+      if (!metParams->sensors.empty() || !metParams->sensorName.empty()
+          || simParams->wrfInputData || hrrrInput)
+        throw ParseException("windShapefile cannot be combined with sensor, sensorName, WRF or HRRR input");
+      if (simParams->totalTimeIncrements > 1)
+        throw ParseException("windShapefile supports one timestep only");
+      if (metParams->z0_domain_flag != 0 || simParams->domainRotation != 0
+          || simParams->halo_x != 0 || simParams->halo_y != 0)
+        throw ParseException("windShapefile requires uniform roughness, zero domainRotation and zero halo");
+      if (simParams->originFlag != 0 && simParams->originFlag != 1)
+        throw ParseException("windShapefile requires originFlag 0 or 1");
+      for (int c = 0; c < 3; ++c)
+        if (simParams->domain[c] < 2 || !std::isfinite(simParams->grid[c]) || simParams->grid[c] <= 0)
+          throw ParseException("windShapefile requires at least two QES cells per axis and positive finite cellSize");
+      if (simParams->verticalStretching != 0)
+        throw ParseException("windShapefile currently supports uniform vertical QES grids only");
+      if (buildingsParams && !buildingsParams->shpFile.empty()
+          && (simParams->UTMx != static_cast<float>(metParams->windShapefile->originX)
+              || simParams->UTMy != static_cast<float>(metParams->windShapefile->originY)))
+        throw ParseException("windShapefile: building shapefile requires simulationParameters UTMx/UTMy matching originX/originY");
+    }
   }
 };
