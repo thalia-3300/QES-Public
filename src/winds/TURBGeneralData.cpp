@@ -178,10 +178,20 @@ TURBGeneralData::TURBGeneralData(const WINDSInputData *WID, WINDSGeneralData *WG
     zRef = 3.0 * bldgH_mean;
 
   } else {
-    z0d = WID->metParams->windShapefile ? WID->metParams->windShapefile->siteZ0
+    z0d = WID->metParams->windVTK ? WID->metParams->windVTK->siteZ0 : WID->metParams->windShapefile ? WID->metParams->windShapefile->siteZ0
                                       : WID->metParams->sensors[0]->TS[0]->site_z0;
     d0d = 0.0;
-    zRef = 100.0 * z0d;
+    // zRef is measured from the QES vertical origin.  With a terrain
+    // following DEM/VTK field, 100*z0 can lie below the terrain everywhere
+    // (for example zRef=10 m while the local terrain is hundreds of metres
+    // high).  That leaves no valid cells for the reference average and makes
+    // uRef = uSum/nVal become NaN.  Keep the roughness based choice when it
+    // is usable, but move the reference plane above the highest terrain.
+    const float terrainClearance = std::max(10.0f, 2.0f * domain.dz());
+    zRef = std::max(100.0f * z0d, terrainH_max + terrainClearance);
+    if (zRef >= domain.z_face.back()) {
+      throw std::runtime_error("QES-TURB: terrain-aware reference height is outside the vertical domain");
+    }
   }
 
   std::cout << "[QES-TURB]\t Computing friction velocity..." << std::endl;
@@ -472,7 +482,16 @@ void TURBGeneralData::frictionVelocity()
   }
   uRef = uSum / nVal;
 
+  if (nVal <= 0.0f || !std::isfinite(uRef) || !std::isfinite(z0d) || z0d <= 0.0f
+      || !std::isfinite(zRef) || zRef <= d0d
+      || !std::isfinite((zRef - d0d) / z0d) || (zRef - d0d) / z0d <= 1.0f) {
+    throw std::runtime_error("QES-TURB: no valid fluid cells at the reference height; check terrain/domain height and roughness");
+  }
+
   uStar = 0.4 * uRef / log((zRef - d0d) / z0d);
+  if (!std::isfinite(uStar)) {
+    throw std::runtime_error("QES-TURB: friction velocity is not finite");
+  }
   std::cout << "[QES-TURB]\t Mean reference velocity at zRef = " << zRef << " m ==> uRef = " << uRef << " m/s" << std::endl;
   std::cout << "[QES-TURB]\t Mean friction velocity uStar = " << uStar << " m/s" << std::endl;
 }

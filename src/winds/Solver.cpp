@@ -44,6 +44,7 @@
  */
 
 #include "Solver.h"
+#include "WindProfilerVTK.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -155,6 +156,7 @@ void Solver::recoverVelocity(WINDSGeneralData *w) const
                     *(lambda[c]-lambda[c-(domain.nx()-1)*(domain.ny()-1)]);
       }
   maskSolidFaces(w);
+  if (!w->u0_imported.empty()) WindProfilerVTK::finishVelocity(w);
 }
 
 void Solver::reportConvergence(const WINDSGeneralData *w, int iterations, double maxUpdate, int limit)
@@ -196,6 +198,7 @@ void Solver::reportConvergence(const WINDSGeneralData *w, int iterations, double
     diagnostics.converged ? "CONVERGED" : "NOT CONVERGED", iterations,limit,maxUpdate,diagnostics.maxEquationResidual,double(tol));
   printf("[Solver] Solved regular/stair air cells: %zu; divergence max=%.9g s^-1, RMS=%.9g s^-1, net flux=%.9g m^3/s (excludes prescribed outer ring/top and cut cells)\n",
     count,diagnostics.maxDivergence,diagnostics.rmsDivergence,diagnostics.netFlux);
+  if (!w->u0_imported.empty()) WindProfilerVTK::reportFinal(w);
   if (!diagnostics.converged)
     std::cerr << "[WARNING] Wind solve did not meet tolerance; output is NOT a converged solution.\n";
 }

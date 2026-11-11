@@ -36,6 +36,8 @@ QES-Fire is a microscale wildfire model coupling the fire front to microscale wi
 
 ## User Documentation
 
+For full 3D terrain-following VTK wind input, the Ghost Town example, and separate imported-field output, see [3D VTK wind input](docs/WIND_VTK_INPUT.md).
+
 For direct regular-grid WindNinja shapefile input, GPU run instructions, and Testing/Clare examples, see [WindNinja input](docs/WINDNINJA_INPUT.md).
 
 For a code-verified build and usage walkthrough, current command-line reference, XML schema reference, output descriptions, and troubleshooting guidance, see the [QES-Winds and QES-Plume user guide](docs/QES_WINDS_PLUME_USER_GUIDE.md). Copyable current-schema inputs are available in [`docs/examples`](docs/examples).

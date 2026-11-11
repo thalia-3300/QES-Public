@@ -138,7 +138,10 @@ void PolyBuilding::polygonWake(const WINDSInputData *WID, WINDSGeneralData *WGD,
   polygon_area = abs(polygon_area);
   width_eff = polygon_area / (x2 - x1);// Effective width of the building
   length_eff = polygon_area / (y2 - y1);// Effective length of the building
-  float wake_height = height_eff;// effective top of the wake
+  // Shape the wake with heights above the building base. height_eff is the
+  // roof elevation in domain coordinates and includes the terrain elevation.
+  // Mixing it with z_build would flatten wakes for buildings on high terrain.
+  float wake_height = H;
 
   // Loop through points to find the height added to the effective height because of rooftop parameterization
   for (size_t id = 0; id < polygonVertices.size() - 1; id++) {
@@ -232,10 +235,9 @@ void PolyBuilding::polygonWake(const WINDSInputData *WID, WINDSGeneralData *WGD,
       }
 
       if (rooftop_flag == 1) {
-        // Smaller of the effective height (height_eff) and the effective cross-wind width (Weff)
-        small_dimension = MIN_S(width_eff, height_eff);
-        // Larger of the effective height (height_eff) and the effective cross-wind width (Weff)
-        long_dimension = MAX_S(width_eff, height_eff);
+        // Rooftop scaling also uses the physical height above the base.
+        small_dimension = MIN_S(width_eff, H);
+        long_dimension = MAX_S(width_eff, H);
         R_scale = pow(small_dimension, (2.0 / 3.0)) * pow(long_dimension, (1.0 / 3.0));// Scaling length
         R_cx = 0.9 * R_scale;// Normalized cavity length
         vd = 0.5 * 0.22 * R_scale;// Cavity height
@@ -286,7 +288,7 @@ void PolyBuilding::polygonWake(const WINDSInputData *WID, WINDSGeneralData *WGD,
     wake_height = (1.4077 * L_over_H - 1.5705 * W_over_H + 0.9297) * wake_height;
     for (auto k = k_start; k <= nz - 2; k++) {
       k_s = k;
-      if (z_s <= WGD->domain.z[k]) {
+      if (base_height + z_s <= WGD->domain.z[k]) {
         break;
       }
     }
@@ -347,7 +349,7 @@ void PolyBuilding::polygonWake(const WINDSInputData *WID, WINDSGeneralData *WGD,
 
   for (auto k = k_start; k < nz - 2; k++) {
     k_top = k;
-    if (wake_height < WGD->domain.z[k + 1]) {
+    if (base_height + wake_height < WGD->domain.z[k + 1]) {
       break;
     }
   }

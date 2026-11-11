@@ -38,6 +38,9 @@ SET(qesWindCoreSources
         WindProfilerShapefile.cpp
         WindShapefileInput.cpp
         WindShapefileGrid.cpp
+        WindVTKGrid.cpp
+        WindVTKInput.cpp
+        WindProfilerVTK.cpp
 	WindProfilerHRRR.cpp
         WINDSInputData.h
         WINDSGeneralData.cpp WINDSGeneralData.h

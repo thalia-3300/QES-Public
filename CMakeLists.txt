@@ -546,3 +546,9 @@ elseif(UNIX)
 endif()
 
 include( CPack )
+
+option(ENABLE_WIND_VTK_TESTS "Build standalone physical 3D VTK regression tests" OFF)
+if (ENABLE_WIND_VTK_TESTS)
+  enable_testing()
+  add_subdirectory(tests/windVTK)
+endif()

@@ -182,3 +182,5 @@ and compare against measurements or a suitable reference before scientific use.
 Not implemented: irregular/rotated source grids, multiple files/times/heights,
 automatic unit/height inference, spatial roughness/stability, automatic CRS
 conversion, or assimilation/blending with sensors/WRF/HRRR.
+
+For WindNinja binary legacy VTK volumes with u/v/w at multiple physical heights, see [full 3D VTK input](WIND_VTK_INPUT.md). That input preserves vertical velocity and does not use this shapefile mode's single-height vertical profile.

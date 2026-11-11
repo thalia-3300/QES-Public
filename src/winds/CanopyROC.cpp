@@ -199,7 +199,10 @@ void CanopyROC::setCellFlags(const WINDSInputData *WID, WINDSGeneralData *WGD, i
     }
   }
 
-  if (WID->metParams->windShapefile) {
+  if (WID->metParams->windVTK) {
+    rL = WID->metParams->windVTK->reciprocal;
+    z0_site = WID->metParams->windVTK->siteZ0;
+  } else if (WID->metParams->windShapefile) {
     rL = WID->metParams->windShapefile->reciprocal;
     z0_site = WID->metParams->windShapefile->siteZ0;
   } else {

@@ -94,7 +94,7 @@ DTEHeightField::DTEHeightField(const std::vector<double> &heightField,
   : m_cellSize(cellSize), m_dim(dim)
 {
   std::cout << "-------------------------------------------------------------------" << std::endl;
-  std::cout << "[DTEHeightField]  Constructing the DTE from WRF input height-field..." << std::endl;
+  std::cout << "[DTEHeightField]  Constructing the DTE from input height-field..." << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
 

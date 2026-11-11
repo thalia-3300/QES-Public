@@ -266,6 +266,13 @@ public:
   ///@{
   /** Declaration of initial wind components (u0,v0,w0) */
   std::vector<float> u0, v0, w0;
+  // Immutable import, before parameterisations; masks: 0 solid, 1 sampled, 2 ghost.
+  double vtk_origin_x=0, vtk_origin_y=0, vtk_origin_z=0;
+  int vtk_epsg=0;
+  std::string vtk_source, vtk_terrain_source;
+  std::vector<float> u0_imported, v0_imported, w0_imported;
+  std::vector<int> vtk_u_mask, vtk_v_mask, vtk_w_mask;
+  double terrainHeight(const WINDSInputData *, double x, double y) const;
   // maintain a separate QESWindData for u0,v0,w0
   ///@}
 

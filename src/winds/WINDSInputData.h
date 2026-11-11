@@ -114,6 +114,7 @@ public:
     parseElement<VegetationParams>(false, vegetationParams, "vegetationParams");
     parseElement<HRRRInput>(false, hrrrInput, "hrrrInput");
     parseElement<Fires>(false, fires, "fires");
+    if (metParams && metParams->windVTK) metParams->windVTK->prepare(this);
     if (metParams && metParams->windShapefile) {
       if (!metParams->sensors.empty() || !metParams->sensorName.empty()
           || simParams->wrfInputData || hrrrInput)

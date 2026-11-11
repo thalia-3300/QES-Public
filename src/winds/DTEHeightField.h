@@ -320,7 +320,7 @@ private:
 
 
   std::string m_filename; /**< :document this: */
-  GDALDataset *m_poDataset; /**< :document this: */
+  GDALDataset *m_poDataset = nullptr; /**< :document this: */
   double m_geoTransform[6]; /**< :document this: */
 
   // int m_nXSize, m_nYSize;
@@ -330,7 +330,7 @@ private:
   ///@}
 
   // Texture relative information
-  GDALDataset *m_imageDataset; /**< :document this: */
+  GDALDataset *m_imageDataset = nullptr; /**< :document this: */
   ///@{
   /** :document this: */
   int m_imageXSize, m_imageYSize;
@@ -361,7 +361,7 @@ private:
   float min[3], max[3];
   ///@}
 
-  float *pafScanline; /**< :document this: */
+  float *pafScanline = nullptr; /**< :document this: */
 };
 
 
