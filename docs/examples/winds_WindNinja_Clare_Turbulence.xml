@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QESWindsParameters>
+  <!--
+    Clare Valley WindNinja input with QES turbulence parameters.
+    Run qesWinds with both -w and -t: the switches create the workspace and
+    turbulence files needed by the standalone qesPlume executable.
+
+    The WindNinja output metadata still needs confirmation. The values below
+    retain the tested assumptions: 10 m AGL, z0=0.1 m and neutral QES stability.
+  -->
+  <simulationParameters>
+    <domain>48 48 30</domain>
+    <cellSize>20 20 10</cellSize>
+    <totalTimeIncrements>1</totalTimeIncrements>
+    <maxIterations>1000</maxIterations>
+    <tolerance>1e-7</tolerance>
+    <domainRotation>0</domainRotation>
+    <halo_x>0</halo_x>
+    <halo_y>0</halo_y>
+    <DEM>../../../Capstone/Windninja Output/ClareVallySnippet1/DEM/50 Centimetre/ClareStockport2021-DEM-GRID-0_5_2776252_54_0001_0001.tif</DEM>
+    <originFlag>0</originFlag>
+    <DEMDistancex>20</DEMDistancex>
+    <DEMDistancey>20</DEMDistancey>
+  </simulationParameters>
+
+  <metParams>
+    <z0_domain_flag>0</z0_domain_flag>
+    <windShapefile>
+      <file>../../../Capstone/Windninja Output/ClareVallySnippet1/DEM/50 Centimetre/ClareStockport2021-DEM-GRID-0_5_2776252_54_0001_0001_90_10_09-17-2026_1630_20m_non_neutral_stability.shp</file>
+      <speedField>speed</speedField>
+      <directionField>dir</directionField>
+      <speedUnits>m/s</speedUnits>
+      <directionUnits>degrees</directionUnits>
+      <originX>277020</originX>
+      <originY>6252020</originY>
+      <height>10</height>
+      <siteZ0>0.1</siteZ0>
+      <reciprocal>0</reciprocal>
+      <boundaryLayerFlag>1</boundaryLayerFlag>
+      <timeStamp>2026-09-17T16:30:00</timeStamp>
+    </windShapefile>
+  </metParams>
+
+  <!-- Portable height-above-terrain mixing-length model. -->
+  <turbParams>
+    <method>0</method>
+    <terrainWallFlag>2</terrainWallFlag>
+    <buildingWallFlag>2</buildingWallFlag>
+    <turbUpperBound>20.0</turbUpperBound>
+    <backgroundMixing>0.0</backgroundMixing>
+  </turbParams>
+
+  <fileOptions>
+    <outputFlag>1</outputFlag>
+    <outputFields>all</outputFields>
+  </fileOptions>
+</QESWindsParameters>

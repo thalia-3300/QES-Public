@@ -101,7 +101,7 @@ public:
   float dz() const { return domainData.dz; }
   float dxy() const { return domainData.dxy; }
 
-  std::tuple<float, float, float> getDomainSize() const { return { domainData.dx, domainData.dx, domainData.dz }; }
+  std::tuple<float, float, float> getDomainSize() const { return { domainData.dx, domainData.dy, domainData.dz }; }
   std::tuple<int, int, int> getDomainCellNum() const { return { domainData.nx, domainData.ny, domainData.nz }; }
   std::tuple<int, int, int> getBaseDomainCellNum() const { return { domainData.nx - 1, domainData.ny - 1, domainData.nz - 2 }; }
 

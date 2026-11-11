@@ -34,6 +34,14 @@ QES-Fire is a microscale wildfire model coupling the fire front to microscale wi
 
 > M. J. Moody et al., “QES-Fire: a dynamically coupled fast-response wildfire model,” *Int J Wildland Fire*, vol. 31, no. 3, pp. 306–325, 2022, doi: [10.1071/wf21057](https://doi.org/https://doi.org/10.1071/WF21057).
 
+## User Documentation
+
+For full 3D terrain-following VTK wind input, the Ghost Town example, and separate imported-field output, see [3D VTK wind input](docs/WIND_VTK_INPUT.md).
+
+For direct regular-grid WindNinja shapefile input, GPU run instructions, and Testing/Clare examples, see [WindNinja input](docs/WINDNINJA_INPUT.md).
+
+For a code-verified build and usage walkthrough, current command-line reference, XML schema reference, output descriptions, and troubleshooting guidance, see the [QES-Winds and QES-Plume user guide](docs/QES_WINDS_PLUME_USER_GUIDE.md). Copyable current-schema inputs are available in [`docs/examples`](docs/examples).
+
 ## Package Requirements
 
 ***QES requires C++17.***
@@ -305,5 +313,3 @@ We were running continuous integration on Travis-CI but this is no longer functi
 2. F. Margairaz et al., “Development and evaluation of an isolated-tree flow model for neutral-stability conditions,” *Urban Clim*, vol. 42, p. 101083, 2022, doi: [10.1016/j.uclim.2022.101083](https://doi.org/10.1016/j.uclim.2022.101083).
 
 3. M. J. Moody et al., “QES-Fire: a dynamically coupled fast-response wildfire model,” *Int J Wildland Fire*, vol. 31, no. 3, pp. 306–325, 2022, doi: [10.1071/wf21057](https://doi.org/https://doi.org/10.1071/WF21057).
-
-

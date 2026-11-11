@@ -474,6 +474,11 @@ add_subdirectory(qes)
 # ----------------------------------------------------------
 #  Testing Suite
 # ----------------------------------------------------------
+option(ENABLE_WIND_SHAPEFILE_TESTS "Build standalone wind shapefile regression tests (no Catch2 download)" OFF)
+if (ENABLE_WIND_SHAPEFILE_TESTS)
+  enable_testing()
+  add_subdirectory(tests/windShapefile)
+endif()
 IF (ENABLE_TESTS)
   enable_testing() # once
   include(CTest)
@@ -541,3 +546,9 @@ elseif(UNIX)
 endif()
 
 include( CPack )
+
+option(ENABLE_WIND_VTK_TESTS "Build standalone physical 3D VTK regression tests" OFF)
+if (ENABLE_WIND_VTK_TESTS)
+  enable_testing()
+  add_subdirectory(tests/windVTK)
+endif()

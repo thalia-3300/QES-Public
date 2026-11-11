@@ -85,6 +85,10 @@ WINDSOutputWorkspace::WINDSOutputWorkspace(WINDSGeneralData *WGD, const std::str
     m_z_face[k] = m_WGD->domain.z_face[k];
   }
 
+  if (!m_WGD->u0_imported.empty()) {
+    for (int i=0;i<nx;++i) m_x_face[i]=i*m_WGD->domain.dx();
+    for (int j=0;j<ny;++j) m_y_face[j]=j*m_WGD->domain.dy();
+  }
   m_utmx = m_WGD->UTMx;
   std::cout << "m_utmx:   " << m_utmx << std::endl;
 
@@ -114,6 +118,24 @@ WINDSOutputWorkspace::WINDSOutputWorkspace(WINDSGeneralData *WGD, const std::str
   createField("u0", "x-component initial velocity", "m s-1", "face-grid", &(m_WGD->u0));
   createField("v0", "y-component initial velocity", "m s-1", "face-grid", &(m_WGD->v0));
   createField("w0", "z-component initial velocity", "m s-1", "face-grid", &(m_WGD->w0));
+
+  if (!m_WGD->u0_imported.empty()) {
+    outfile->putAtt("wind_input", "legacy VTK physical 3D interpolation");
+    outfile->putAtt("vtk_source", m_WGD->vtk_source);
+    outfile->putAtt("vtk_terrain_reference", m_WGD->vtk_terrain_source);
+    outfile->putAtt("vtk_crs_assertion", "XML EPSG and m/s; VTK contains no CRS or units metadata");
+    outfile->putAtt("vtk_epsg", ncInt, m_WGD->vtk_epsg);
+    outfile->putAtt("vtk_origin_x", ncDouble, m_WGD->vtk_origin_x);
+    outfile->putAtt("vtk_origin_y", ncDouble, m_WGD->vtk_origin_y);
+    outfile->putAtt("vtk_origin_z", ncDouble, m_WGD->vtk_origin_z);
+    outfile->putAtt("velocity_staggering", "u(x_face,y,z); v(x,y_face,z); w(x,y,z_face); padded to common shape; vtk_*_mask=2 excludes padding");
+    createField("u0_imported", "VTK u before parameterisations; x face, y/z centre", "m s-1", "face-grid", &m_WGD->u0_imported);
+    createField("v0_imported", "VTK v before parameterisations; y face, x/z centre", "m s-1", "face-grid", &m_WGD->v0_imported);
+    createField("w0_imported", "VTK w before parameterisations; z face, x/y centre", "m s-1", "face-grid", &m_WGD->w0_imported);
+    createField("vtk_u_mask", "u import mask: 0 solid, 1 sampled, 2 padding/ghost", "1", "face-grid", &m_WGD->vtk_u_mask);
+    createField("vtk_v_mask", "v import mask: 0 solid, 1 sampled, 2 padding/ghost", "1", "face-grid", &m_WGD->vtk_v_mask);
+    createField("vtk_w_mask", "w import mask: 0 solid, 1 sampled, 2 padding/ghost", "1", "face-grid", &m_WGD->vtk_w_mask);
+  }
 
   // set cell-centered data dimensions
   // space dimensions

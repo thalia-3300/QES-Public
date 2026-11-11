@@ -34,6 +34,9 @@
  */
 
 #include "WINDSGeneralData.h"
+#include "WindProfilerShapefile.h"
+#include "WindProfilerVTK.h"
+#include "WindVTKGrid.h"
 
 #include <utility>
 
@@ -118,7 +121,26 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
   //
   // Need to now take all WRF station data and convert to
   // sensors
-  if (WID->simParams->wrfInputData) {
+  if (WID->metParams && WID->metParams->windVTK) {
+    windProfiler = new WindProfilerVTK();
+    const auto &input = *WID->metParams->windVTK;
+    sensortime.emplace_back(input.timeStamp);
+    sensortime_id.push_back(0); timestamp = sensortime; totalTimeIncrements = 1;
+    vtk_origin_x=input.originX; vtk_origin_y=input.originY; vtk_origin_z=input.originZ; vtk_epsg=input.epsg;
+    vtk_source=input.file; vtk_terrain_source=input.terrainFile;
+    UTMx = input.originX; UTMy = input.originY; UTMZone = WID->simParams->UTMZone;
+    u0_imported.resize(u0.size()); v0_imported.resize(v0.size()); w0_imported.resize(w0.size());
+    vtk_u_mask.resize(u0.size()); vtk_v_mask.resize(v0.size()); vtk_w_mask.resize(w0.size());
+  } else if (WID->metParams && WID->metParams->windShapefile) {
+    windProfiler = new WindProfilerShapefile(WID, domain);
+    sensortime.emplace_back(WID->metParams->windShapefile->timeStamp);
+    sensortime_id.push_back(0);
+    timestamp = sensortime;
+    totalTimeIncrements = 1;
+    UTMx = WID->metParams->windShapefile->originX;
+    UTMy = WID->metParams->windShapefile->originY;
+    UTMZone = WID->simParams->UTMZone;
+  } else if (WID->simParams->wrfInputData) {
 
     WRFInput *wrf_ptr = WID->simParams->wrfInputData;
 
@@ -386,8 +408,9 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
   }
 
   // Pete could move to input param processing...
-  assert(WID->metParams->sensors.size() > 0);// extra
-  std::cout << "[QES-WINDS]\t Sensors have been loaded (total sensors = " << WID->metParams->sensors.size() << ")." << std::endl;
+  assert(WID->metParams->windVTK || WID->metParams->windShapefile || !WID->metParams->sensors.empty());
+  if (!WID->metParams->windVTK && !WID->metParams->windShapefile)
+    std::cout << "[QES-WINDS]\t Sensors have been loaded (total sensors = " << WID->metParams->sensors.size() << ")." << std::endl;
 
   // /////////////////////////
   // Calculation of z0 domain info MAY need to move to WINDSInputData
@@ -401,9 +424,10 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
     for (auto i = 0; i < domain.nx(); i++) {
       for (auto j = 0; j < domain.ny(); j++) {
         id = i + j * domain.nx();
-        z0_domain_u[id] = WID->metParams->sensors[0]->TS[0]->site_z0;
-        z0_domain_v[id] = WID->metParams->sensors[0]->TS[0]->site_z0;
-        z0 = WID->metParams->sensors[0]->TS[0]->site_z0;
+        z0 = WID->metParams->windVTK ? WID->metParams->windVTK->siteZ0 : WID->metParams->windShapefile ? WID->metParams->windShapefile->siteZ0
+                                         : WID->metParams->sensors[0]->TS[0]->site_z0;
+        z0_domain_u[id] = z0;
+        z0_domain_v[id] = z0;
       }
     }
   } else {
@@ -469,7 +493,7 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
         ii = i + halo_index_x;
         jj = j + halo_index_y;
         idx = ii + jj * (domain.nx() - 1);
-        terrain[idx] = WID->simParams->DTE_mesh->getHeight(i * domain.dx() + domain.dx() * 0.5f, j * domain.dy() + domain.dy() * 0.5f);
+        terrain[idx] = terrainHeight(WID, i * domain.dx() + domain.dx() * 0.5f, j * domain.dy() + domain.dy() * 0.5f);
         if (terrain[idx] < 0.0) {
           terrain[idx] = 0.0;
         }
@@ -622,8 +646,14 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
       for (int j = 0; j < domain.ny() - 1; j++) {
         // Gets height of the terrain for each cell
         int idx = i + j * (domain.nx() - 1);
+        double envelope = terrain[idx];
+        if (WID->metParams->windVTK) {
+          const auto &v = *WID->metParams->windVTK;
+          envelope = v.field->groundMaximum(v.originX+i*double(domain.dx()), v.originY+j*double(domain.dy()),
+                       v.originX+(i+1)*double(domain.dx()), v.originY+(j+1)*double(domain.dy()))-v.originZ;
+        }
         for (size_t k = 0; k < domain.z.size() - 1; k++) {
-          if (terrain[idx] < domain.z[k + 1]) {
+          if (WID->metParams->windVTK ? envelope <= domain.z_face[k+1] : terrain[idx] < domain.z[k + 1]) {
             break;
           }
           // icell_cent = i + j * (nx - 1) + (k + 1) * (nx - 1) * (ny - 1);
@@ -645,8 +675,14 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
         for (int j = 0; j < domain.ny() - 1; j++) {
           // Gets height of the terrain for each cell
           int idx = i + j * (domain.nx() - 1);
+          double envelope = terrain[idx];
+          if (WID->metParams->windVTK) {
+            const auto &v = *WID->metParams->windVTK;
+            envelope = v.field->groundMaximum(v.originX+i*double(domain.dx()), v.originY+j*double(domain.dy()),
+                         v.originX+(i+1)*double(domain.dx()), v.originY+(j+1)*double(domain.dy()))-v.originZ;
+          }
           for (size_t k = 0; k < domain.z.size() - 1; k++) {
-            if (terrain[idx] < domain.z[k + 1]) {
+            if (WID->metParams->windVTK ? envelope <= domain.z_face[k+1] : terrain[idx] < domain.z[k + 1]) {
               break;
             }
 
@@ -755,13 +791,13 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
         // Setting base height for buildings if there is a DEM file
         if (WID->simParams->DTE_heightField && WID->simParams->DTE_mesh) {
           // Get base height of every corner of building from terrain height
-          min_height = WID->simParams->DTE_mesh->getHeight(WID->buildingsParams->SHPData->m_polygons[pIdx][0].x_poly,
+          min_height = terrainHeight(WID, WID->buildingsParams->SHPData->m_polygons[pIdx][0].x_poly,
                                                            WID->buildingsParams->SHPData->m_polygons[pIdx][0].y_poly);
           if (min_height < 0) {
             min_height = 0.0;
           }
           for (size_t lIdx = 1u; lIdx < WID->buildingsParams->SHPData->m_polygons[pIdx].size(); lIdx++) {
-            corner_height = WID->simParams->DTE_mesh->getHeight(WID->buildingsParams->SHPData->m_polygons[pIdx][lIdx].x_poly,
+            corner_height = terrainHeight(WID, WID->buildingsParams->SHPData->m_polygons[pIdx][lIdx].x_poly,
                                                                 WID->buildingsParams->SHPData->m_polygons[pIdx][lIdx].y_poly);
 
             if (corner_height < min_height && corner_height >= 0.0) {
@@ -813,13 +849,13 @@ WINDSGeneralData::WINDSGeneralData(const WINDSInputData *WID, qes::Domain domain
       // Setting base height for buildings if there is a DEM file
       if (WID->simParams->DTE_heightField && WID->simParams->DTE_mesh) {
         // Get base height of every corner of building from terrain height
-        min_height = WID->simParams->DTE_mesh->getHeight(allBuildingsV[j]->polygonVertices[0].x_poly,
+        min_height = terrainHeight(WID, allBuildingsV[j]->polygonVertices[0].x_poly,
                                                          allBuildingsV[j]->polygonVertices[0].y_poly);
         if (min_height < 0) {
           min_height = 0.0;
         }
         for (size_t lIdx = 1; lIdx < allBuildingsV[j]->polygonVertices.size(); lIdx++) {
-          corner_height = WID->simParams->DTE_mesh->getHeight(allBuildingsV[j]->polygonVertices[lIdx].x_poly,
+          corner_height = terrainHeight(WID, allBuildingsV[j]->polygonVertices[lIdx].x_poly,
                                                               allBuildingsV[j]->polygonVertices[lIdx].y_poly);
 
           if (corner_height < min_height && corner_height >= 0.0) {
@@ -1376,6 +1412,10 @@ void WINDSGeneralData::applyParametrizations(const WINDSInputData *WID)
 
 
   wall->setVelocityZero(this);
+  if (WID->metParams->windVTK) {
+    WindProfilerVTK::enforceMasks(this);
+    WindProfilerVTK::reportChange(this);
+  }
 
   auto finish_param = std::chrono::high_resolution_clock::now();// Finish recording execution time
 
@@ -1753,4 +1793,11 @@ void WINDSGeneralData::downscaleHRRR(const WINDSInputData *WID)
     }
   }
   std::cout << "[done]" << std::endl;
+}
+
+// Keep terrain sampling in the same physical coordinates as the imported field.
+double WINDSGeneralData::terrainHeight(const WINDSInputData *wid, double x, double y) const
+{
+  if (wid->metParams && wid->metParams->windVTK) return wid->metParams->windVTK->localGround(x,y);
+  return wid->simParams->DTE_mesh->getHeight(x,y);
 }

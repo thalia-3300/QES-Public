@@ -80,13 +80,20 @@ protected:
   const float B; /**< :document this: */
 
   float tol; /**< Error tolerance */
-  const float omega = 1.78f; /**< Over-relaxation factor */
+  const double omega = 1.78; /**< Over-relaxation factor */
 
   // int itermax; /**< Maximum number of iterations */
 
   // SOLVER-based parameters
-  std::vector<float> R; /**< Divergence of initial velocity field */
-  std::vector<float> lambda, lambda_old; /**< :document these as group or indiv: */
+  // Correction potentials can be large even for moderate winds. Single
+  // precision stalls their updates well above the default tolerance.
+  std::vector<double> R;
+  std::vector<double> lambda, lambda_old;
+
+  void buildRHS(const WINDSGeneralData *);
+  void maskSolidFaces(WINDSGeneralData *) const;
+  void recoverVelocity(WINDSGeneralData *) const;
+  void reportConvergence(const WINDSGeneralData *, int iterations, double maxUpdate, int limit);
 
 
   Solver(qes::Domain domain_in, const float &tolerance);
@@ -100,6 +107,13 @@ protected:
 
 
 public:
+  virtual ~Solver() = default;
+  struct Diagnostics {
+    bool converged = false;
+    int iterations = 0;
+    double maxUpdate = 0, maxEquationResidual = 0;
+    double maxDivergence = 0, rmsDivergence = 0, netFlux = 0;
+  } diagnostics;
   void resetLambda();
   void copyLambda();
 

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<QESWindsParameters>
+  <!-- Smoke example only: confirm actual WindNinja height/roughness/stability. -->
+  <simulationParameters>
+    <domain>44 44 30</domain>
+    <cellSize>20 20 10</cellSize>
+    <totalTimeIncrements>1</totalTimeIncrements>
+    <maxIterations>1000</maxIterations>
+    <tolerance>1e-7</tolerance>
+    <domainRotation>0</domainRotation>
+    <halo_x>0</halo_x>
+    <halo_y>0</halo_y>
+  </simulationParameters>
+  <metParams>
+    <z0_domain_flag>0</z0_domain_flag>
+    <windShapefile>
+      <file>../../../Capstone/Windninja Output/Testing/testreal.tiff_0_10_09-10-2026_2109_7m.shp</file>
+      <speedField>speed</speedField>
+      <directionField>dir</directionField>
+      <speedUnits>m/s</speedUnits>
+      <directionUnits>degrees</directionUnits>
+      <originX>374610</originX>
+      <originY>5835000</originY>
+      <!-- Unverified test assumptions, not inferred from filename. -->
+      <height>10</height>
+      <siteZ0>0.1</siteZ0>
+      <reciprocal>0</reciprocal>
+      <boundaryLayerFlag>1</boundaryLayerFlag>
+      <timeStamp>2026-09-10T21:09:00</timeStamp>
+    </windShapefile>
+  </metParams>
+  <fileOptions>
+    <outputFlag>1</outputFlag>
+    <outputFields>all</outputFields>
+  </fileOptions>
+  <turbParams><method>0</method></turbParams>
+</QESWindsParameters>
